@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Emitter Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Node.js EventEmitter Demo</h1>
+
+        <div class="controls">
+            <div class="card">
+                <h2>User Login</h2>
+                <input type="text" id="login-username" placeholder="Username">
+                <button onclick="triggerEvent('user-login', { username: getValue('login-username') })">Trigger
+                    Login</button>
+            </div>
+
+            <div class="card">
+                <h2>User Logout</h2>
+                <input type="text" id="logout-username" placeholder="Username">
+                <button onclick="triggerEvent('user-logout', { username: getValue('logout-username') })">Trigger
+                    Logout</button>
+            </div>
+
+            <div class="card">
+                <h2>User Purchase</h2>
+                <input type="text" id="purchase-username" placeholder="Username">
+                <input type="text" id="purchase-item" placeholder="Item">
+                <input type="number" id="purchase-price" placeholder="Price">
+                <button
+                    onclick="triggerEvent('user-purchase', { username: getValue('purchase-username'), item: getValue('purchase-item'), price: getValue('purchase-price') })">Trigger
+                    Purchase</button>
+            </div>
+
+            <div class="card">
+                <h2>Profile Update</h2>
+                <input type="text" id="update-username" placeholder="Username">
+                <input type="text" id="update-field" placeholder="Field Updated">
+                <button
+                    onclick="triggerEvent('profile-update', { username: getValue('update-username'), field: getValue('update-field') })">Trigger
+                    Update</button>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <button class="primary-btn" onclick="getSummary()">Get Event Summary</button>
+        </div>
+
+        <div class="log-container">
+            <h3>Server Response Log:</h3>
+            <pre id="log-output">Waiting for actions...</pre>
+        </div>
+    </div>
+
+    <script>
+        function getValue(id) {
+            return document.getElementById(id).value;
+        }
+
+        function log(message) {
+            const logOutput = document.getElementById('log-output');
+            const timestamp = new Date().toLocaleTimeString();
+            logOutput.textContent = `[${timestamp}] ${message}\n` + logOutput.textContent;
+        }
+
+        async function triggerEvent(type, data) {
+            try {
+                const response = await fetch('/trigger-event', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type, data })
+                });
+                const result = await response.json();
+                console.log(result);
+                log(result.message);
+            } catch (error) {
+                console.error('Error:', error);
+                log('Error triggering event.');
+            }
+        }
+
+        async function getSummary() {
+            try {
+                const response = await fetch('/summary');
+                const result = await response.json();
+                console.log(result);
+                log('Summary fetched: ' + JSON.stringify(result.counts, null, 2));
+            } catch (error) {
+                console.error('Error:', error);
+                log('Error fetching summary.');
+            }
+        }
+    </script>
+</body>
+
+</html>
