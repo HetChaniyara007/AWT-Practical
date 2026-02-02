@@ -1,12 +1,5 @@
 {
-  "name": "event-emitter-demo",
-  "version": "1.0.0",
-  "description": "A demo of Node.js EventEmitter",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^5.2.1"
   }
 }
