@@ -1,0 +1,22 @@
+<nav class="navbar">
+    <a href="/" class="logo">CampusConnect.</a>
+    <ul class="nav-links">
+        <% if (locals.user) { %>
+            <li id="user-greeting"><span style="color: var(--accent-blue)">Hi, <%= user.name %></span></li>
+            <% } %>
+                <li><a href="/" class="<%= typeof page !== 'undefined' && page === 'home' ? 'active' : '' %>">Home</a>
+                </li>
+                <li><a href="/events"
+                        class="<%= typeof page !== 'undefined' && page === 'events' ? 'active' : '' %>">Events</a></li>
+                <li><a href="/clubs"
+                        class="<%= typeof page !== 'undefined' && page === 'clubs' ? 'active' : '' %>">Clubs</a></li>
+                <li><a href="/about"
+                        class="<%= typeof page !== 'undefined' && page === 'about' ? 'active' : '' %>">About</a></li>
+    </ul>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">☀️</button>
+    <% if (locals.user) { %>
+        <a href="#" class="btn-login" id="logoutBtn">Logout</a>
+        <% } else { %>
+            <a href="/login" class="btn-login">Login</a>
+            <% } %>
+</nav>

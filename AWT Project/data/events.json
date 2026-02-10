@@ -14,13 +14,5 @@
     "location": "Campus Grounds",
     "image": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=2670",
     "description": "Three days of music, dance, and art. Don't miss the biggest event of the year!"
-  },
-  {
-    "id": 3,
-    "title": "Alumni Meet & Greet",
-    "date": "May 10, 2026",
-    "location": "Conference Hall B",
-    "image": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=2670",
-    "description": "Network with successful alumni and gain career insights."
   }
 ]

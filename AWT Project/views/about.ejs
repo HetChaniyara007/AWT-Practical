@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('partials/head', { title: 'About - CampusConnect' }) %>
+
+    <body>
+        <%- include('partials/navbar', { page: 'about' }) %>
+
+            <div style="padding-top: 60px;"></div>
+
+            <!-- About Section with Background Image -->
+            <section class="about-hero" style="
+        position: relative; 
+        height: calc(100vh - 60px); 
+        width: 100%; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        color: white; 
+        text-align: center;
+        overflow: hidden;
+    ">
+                <!-- Background Image -->
+                <div class="about-bg" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); 
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.4); /* Darkens the image for legibility */
+            z-index: -1;
+        "></div>
+
+                <!-- Content Overlay -->
+                <div class="about-content-overlay" style="
+            max-width: 800px; 
+            padding: 2rem;
+            animation: fadeIn 1s ease-out;
+        ">
+                    <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem; font-weight: 700; color: white !important;">
+                        About CampusConnect</h1>
+                    <p style="font-size: 1.2rem; line-height: 1.8; margin-bottom: 2rem; color: white !important;">
+                        CampusConnect is more than just a platform; it's the heartbeat of our university life.
+                        Designed to bridge the gap between students, faculty, and the vibrant activities on campus,
+                        we ensure that every voice is heard and every event is celebrated.
+                    </p>
+                    <p
+                        style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 2.5rem; opacity: 0.9; color: white !important;">
+                        Whether you're organizing a cultural fest, joining a tech club, or simply looking to connect
+                        with like-minded peers, CampusConnect is your gateway to a richer college experience.
+                    </p>
+                    <a href="/clubs" class="btn-primary" style="padding: 12px 30px; font-size: 1.1rem;">Join Our
+                        Community</a>
+                </div>
+            </section>
+
+            <%- include('partials/footer') %>
+
+                <script src="/js/main.js"></script>
+    </body>
+
+</html>

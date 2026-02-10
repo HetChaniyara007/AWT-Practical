@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('partials/head', { title: 'CampusConnect - Home' }) %>
+
+    <body>
+        <%- include('partials/navbar', { page: 'home' }) %>
+
+            <header class="hero">
+                <h1>Discover & Manage <br> College Events effortlessly</h1>
+                <p>The one-stop platform for all campus activities, workshops, and cultural fests. Stay updated and
+                    never miss
+                    out.</p>
+                <div class="cta-group">
+                    <a href="/events" class="btn-primary">Browse Events</a>
+                    <% if (user && user.role==='admin' ) { %>
+                        <a href="/events" class="btn-secondary">Host an Event</a>
+                        <% } else { %>
+                            <a href="#" class="btn-secondary"
+                                onclick="alert('To host an event, please contact the Student Council at council@college.edu or visit the Student Center.'); return false;">Host
+                                an Event</a>
+                            <% } %>
+                </div>
+            </header>
+
+            <section class="featured-events">
+                <div class="section-header">
+                    <h2>Upcoming Events</h2>
+                    <a href="/events" class="view-all">View All Events &rarr;</a>
+                </div>
+
+                <div class="events-grid">
+                    <% if (events && events.length> 0) { %>
+                        <% events.forEach(event=> { %>
+                            <div class="event-card">
+                                <img src="<%= event.image %>" alt="<%= event.title %>" class="card-image">
+                                <div class="card-content">
+                                    <span class="event-date">
+                                        <%= event.date %>
+                                    </span>
+                                    <h3>
+                                        <%= event.title %>
+                                    </h3>
+                                    <div class="event-location">
+                                        <span>📍</span>
+                                        <%= event.location %>
+                                    </div>
+                                    <p class="event-description">
+                                        <%= event.description %>
+                                    </p>
+                                </div>
+                            </div>
+                            <% }); %>
+                                <% } else { %>
+                                    <p>No upcoming events found.</p>
+                                    <% } %>
+                </div>
+            </section>
+
+            <%- include('partials/footer') %>
+
+                <script src="/js/main.js"></script>
+    </body>
+
+</html>

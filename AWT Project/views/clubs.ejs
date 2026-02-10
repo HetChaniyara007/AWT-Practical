@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('partials/head', { title: 'Clubs - CampusConnect' }) %>
+
+    <body>
+        <%- include('partials/navbar', { page: 'clubs' }) %>
+
+            <div style="padding-top: 80px;"></div>
+
+            <!-- Clubs Section -->
+            <section class="clubs-section" id="clubs">
+                <div class="section-header">
+                    <h2>Student Clubs</h2>
+                    <a href="#" class="view-all">Join a Club &rarr;</a>
+                </div>
+                <div class="clubs-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <% if (typeof clubs !=='undefined' && clubs.length> 0) { %>
+                        <% clubs.forEach(club=> { %>
+                            <div class="club-card"
+                                style="background: var(--card-bg); padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                <div style="font-size: 3rem; margin-bottom: 10px;">
+                                    <%= club.icon %>
+                                </div>
+                                <h3 style="margin-bottom: 5px;">
+                                    <%= club.name %>
+                                </h3>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                                    <%= club.description %>
+                                </p>
+                            </div>
+                            <% }); %>
+                                <% } %>
+                </div>
+            </section>
+
+            <%- include('partials/footer') %>
+
+                <script src="/js/main.js"></script>
+    </body>
+
+</html>

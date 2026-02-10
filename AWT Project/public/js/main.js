@@ -1,23 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    checkAuth();
-    fetchEvents();
+    // checkAuth(); // redundant
+    // fetchEvents(); // redundant
     initTheme();
+    setupLogout();
 });
-
-let currentUser = null;
-
-async function checkAuth() {
-    try {
-        const response = await fetch('/api/auth/me');
-        const data = await response.json();
-        currentUser = data.user;
-        updateUI();
-    } catch (error) {
-        console.error('Auth check failed:', error);
-    }
-}
-
-
 
 function initTheme() {
     const themeToggle = document.getElementById('theme-toggle');
@@ -45,44 +31,12 @@ function initTheme() {
     }
 }
 
-async function fetchEvents() {
-    try {
-        const response = await fetch('/api/events');
-        const events = await response.json();
-        renderEvents(events);
-    } catch (error) {
-        console.error('Error fetching events:', error);
-    }
-}
-
-function renderEvents(events) {
-    const eventsGrid = document.querySelector('.events-grid');
-    if (!eventsGrid) return;
-
-    eventsGrid.innerHTML = events.map(event => `
-        <div class="event-card">
-            <img src="${event.image}" alt="${event.title}" class="card-image">
-            <div class="card-content">
-                <span class="event-date">${event.date}</span>
-                <h3>${event.title}</h3>
-                <div class="event-location">
-                    <span>📍</span> ${event.location}
-                </div>
-                <p class="event-description">${event.description}</p>
-                ${currentUser && currentUser.role === 'admin'
-            ? `<button onclick="deleteEvent(${event.id})" style="background:rgba(239, 68, 68, 0.2); color:#ef4444; border:1px solid #ef4444; padding:5px 15px; border-radius:50px; margin-top:10px; cursor:pointer;">Delete</button>`
-            : ''}
-            </div>
-        </div>
-    `).join('');
-}
-
 async function deleteEvent(id) {
     if (!confirm('Are you sure you want to delete this event?')) return;
     try {
         const res = await fetch(`/api/events/${id}`, { method: 'DELETE' });
         if (res.ok) {
-            fetchEvents();
+            window.location.reload();
         } else {
             alert('Failed to delete event');
         }
@@ -116,7 +70,7 @@ if (createEventForm) {
             if (res.ok) {
                 document.getElementById('createEventModal').style.display = 'none';
                 createEventForm.reset();
-                fetchEvents();
+                window.location.reload();
             } else {
                 alert('Failed to create event');
             }
@@ -127,36 +81,13 @@ if (createEventForm) {
     });
 }
 
-// Show create button if admin
-function updateUI() {
-    const loginBtn = document.querySelector('.btn-login');
-    const navLinks = document.querySelector('.nav-links');
-    const createBtn = document.getElementById('createEventBtn');
-
-    if (currentUser) {
-        if (loginBtn) {
-            loginBtn.textContent = 'Logout';
-            loginBtn.href = '#';
-            loginBtn.replaceWith(loginBtn.cloneNode(true)); // remove old listeners
-            const newLoginBtn = document.querySelector('.btn-login');
-            newLoginBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                await fetch('/api/auth/logout', { method: 'POST' });
-                window.location.reload();
-            });
-        }
-
-        // Add "Hello, Name" to nav if not already there
-        if (!document.getElementById('user-greeting')) {
-            const userItem = document.createElement('li');
-            userItem.id = 'user-greeting';
-            userItem.innerHTML = `<span style="color: var(--accent-blue)">Hi, ${currentUser.name}</span>`;
-            navLinks.insertBefore(userItem, navLinks.firstChild);
-        }
-
-        // Show create button
-        if (currentUser.role === 'admin' && createBtn) {
-            createBtn.style.display = 'block';
-        }
+function setupLogout() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/';
+        });
     }
 }

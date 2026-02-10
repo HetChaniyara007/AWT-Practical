@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('partials/head', { title: title }) %>
+
+    <body>
+        <%- include('partials/navbar', { page: '' }) %>
+
+            <div style="padding-top: 80px;"></div>
+
+            <section style="padding: 4rem 5%; max-width: 800px; margin: 0 auto;">
+                <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-primary);">
+                    <%= title %>
+                </h1>
+                <div style="color: var(--text-secondary); line-height: 1.8;">
+                    <p>Last updated: <%= new Date().toLocaleDateString() %>
+                    </p>
+                    <br>
+                    <p>This is a placeholder page for the <strong>
+                            <%= title %>
+                        </strong>.</p>
+                    <br>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
+                        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                        laboris nisi ut aliquip ex ea commodo consequat.</p>
+                </div>
+            </section>
+
+            <%- include('partials/footer') %>
+
+                <script src="/js/main.js"></script>
+    </body>
+
+</html>
