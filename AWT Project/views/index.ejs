@@ -36,7 +36,7 @@
                                 <img src="<%= event.image %>" alt="<%= event.title %>" class="card-image">
                                 <div class="card-content">
                                     <span class="event-date">
-                                        <%= event.date %>
+                                        <%= new Date(event.date).toLocaleDateString() %>
                                     </span>
                                     <h3>
                                         <%= event.title %>
@@ -46,7 +46,7 @@
                                         <%= event.location %>
                                     </div>
                                     <p class="event-description">
-                                        <%= event.description %>
+                                        <%= event.description.substring(0, 100) %>...
                                     </p>
                                 </div>
                             </div>

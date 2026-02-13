@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('partials/head', { title: 'My Events - CampusConnect' }) %>
+
+    <body>
+        <%- include('partials/navbar', { page: 'my-events' }) %>
+
+            <div style="padding-top: 80px;"></div>
+
+            <section class="featured-events">
+                <div class="section-header">
+                    <h2>My Hub</h2>
+                </div>
+
+                <div class="events-grid">
+                    <% if (events && events.length> 0) { %>
+                        <% events.forEach(event=> { %>
+                            <div class="event-card">
+                                <img src="<%= event.image %>" alt="<%= event.title %>" class="card-image">
+                                <div class="card-content">
+                                    <span class="event-date">
+                                        <%= new Date(event.date).toLocaleDateString() %>
+                                    </span>
+                                    <h3>
+                                        <%= event.title %>
+                                    </h3>
+                                    <div class="event-location">
+                                        <span>📍</span>
+                                        <%= event.location %>
+                                    </div>
+                                    <p class="event-description">
+                                        <%= event.description %>
+                                    </p>
+                                    <div style="margin-top: 10px; color: var(--accent-green); font-weight: bold;">
+                                        ✅ Registered
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                                <% } else { %>
+                                    <div style="text-align: center; grid-column: 1/-1; padding: 2rem;">
+                                        <p style="font-size: 1.2rem; margin-bottom: 1rem;">You haven't registered for
+                                            any events yet.</p>
+                                        <a href="/events" class="btn-primary">Browse Events</a>
+                                    </div>
+                                    <% } %>
+                </div>
+            </section>
+
+            <%- include('partials/footer') %>
+
+                <script src="/js/main.js"></script>
+    </body>
+
+</html>

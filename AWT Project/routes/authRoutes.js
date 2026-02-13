@@ -1,12 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../utils/db');
-const crypto = require('crypto');
-
-// Simple hash function using crypto
-function hashPassword(password) {
-    return crypto.createHash('sha256').update(password).digest('hex');
-}
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 // Register
 router.post('/register', async (req, res) => {
@@ -17,27 +12,25 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
-        const users = await db.getUsers();
-
         // Check if user exists
-        if (users.find(u => u.email === email)) {
+        const userExists = await User.findOne({ email });
+        if (userExists) {
             return res.status(400).json({ error: 'User already exists' });
         }
 
-        const newUser = {
-            id: Date.now().toString(),
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
             name,
             email,
-            password: hashPassword(password),
-            role: role || 'student' // Default to student
-        };
+            password: hashedPassword,
+            role: role || 'student'
+        });
 
-        users.push(newUser);
-        await db.saveUsers(users); // Fixed: ensure this matches db.js export
-
-        // Set session/cookie
-        res.cookie('user', JSON.stringify({ id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role }), { httpOnly: true });
-        res.json({ success: true, user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role } });
+        // Set session/cookie (Simple implementation for now)
+        res.cookie('userId', newUser._id.toString(), { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }); // 1 day
+        res.json({ success: true, user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role } });
 
     } catch (error) {
         console.error('Register error:', error);
@@ -49,16 +42,21 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const users = await db.getUsers();
-        const user = users.find(u => u.email === email && u.password === hashPassword(password));
+
+        const user = await User.findOne({ email });
 
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
         // Set session/cookie
-        res.cookie('user', JSON.stringify({ id: user.id, name: user.name, email: user.email, role: user.role }), { httpOnly: true });
-        res.json({ success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+        res.cookie('userId', user._id.toString(), { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+        res.json({ success: true, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
 
     } catch (error) {
         console.error('Login error:', error);
@@ -68,16 +66,16 @@ router.post('/login', async (req, res) => {
 
 // Logout
 router.post('/logout', (req, res) => {
-    res.clearCookie('user');
+    res.clearCookie('userId');
     res.json({ success: true });
 });
 
-// Get current user (check session)
-router.get('/me', (req, res) => {
-    const userCookie = req.cookies.user;
-    if (userCookie) {
+// Get current user
+router.get('/me', async (req, res) => {
+    const userId = req.cookies.userId;
+    if (userId) {
         try {
-            const user = JSON.parse(userCookie);
+            const user = await User.findById(userId).select('-password');
             res.json({ user });
         } catch (e) {
             res.json({ user: null });

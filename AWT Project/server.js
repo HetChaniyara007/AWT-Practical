@@ -2,11 +2,16 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const db = require('./utils/db');
+require('dotenv').config();
+const connectDB = require('./utils/dbConfig');
+const User = require('./models/User');
 const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Connect to Database
+connectDB();
 
 // Middleware
 app.use(bodyParser.json());
@@ -19,11 +24,12 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // User Identity Middleware
-app.use((req, res, next) => {
-    const userCookie = req.cookies.user;
-    if (userCookie) {
+app.use(async (req, res, next) => {
+    const userId = req.cookies.userId;
+    if (userId) {
         try {
-            req.user = JSON.parse(userCookie);
+            const user = await User.findById(userId).select('-password');
+            req.user = user;
         } catch (e) {
             req.user = null;
         }
@@ -35,36 +41,32 @@ app.use((req, res, next) => {
 });
 
 // Initialize default admin if not exists
-// Simple hash function using crypto (same as in authRoutes, ideally shared)
-function hashPassword(password) {
-    return crypto.createHash('sha256').update(password).digest('hex');
-}
+// Simple hash function using crypto (should ideally use bcryptjs as per plan, but keeping consistent for now, will update auth routes to use bcryptjs and then update this)
+const bcrypt = require('bcryptjs');
 
 (async () => {
     try {
-        const users = await db.getUsers();
-        if (!users.find(u => u.email === 'admin@college.edu')) {
-            users.push({
-                id: 'admin',
+        const adminEmail = 'admin@college.edu';
+        const adminExists = await User.findOne({ email: adminEmail });
+        if (!adminExists) {
+            const hashedPassword = await bcrypt.hash('admin123', 10);
+            await User.create({
                 name: 'Admin User',
-                email: 'admin@college.edu',
-                password: hashPassword('admin123'),
+                email: adminEmail,
+                password: hashedPassword,
                 role: 'admin'
             });
-            await db.saveUsers(users);
             console.log('Default admin account created: admin@college.edu / admin123');
         }
     } catch (err) {
-        console.error('Error initializing db:', err);
+        console.error('Error initializing default admin:', err);
     }
 })();
 
 // API Routes
-const authRoutes = require('./routes/authRoutes');
-const eventRoutes = require('./routes/eventRoutes');
-
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventRoutes);
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/events', require('./routes/eventRoutes'));
+app.use('/clubs', require('./routes/clubRoutes')); // New Clubs Route
 
 // View Routes
 const clubs = [
@@ -76,11 +78,12 @@ const clubs = [
     { name: "Robotics", icon: "🤖", description: "Build the future with wires and code." }
 ];
 
+const Event = require('./models/Event');
+
 app.get('/', async (req, res) => {
     try {
-        const events = await db.getEvents();
-        const featuredEvents = events.slice(0, 3);
-        res.render('index', { events: featuredEvents });
+        const events = await Event.find({}).sort({ date: 1 }).limit(3);
+        res.render('index', { events });
     } catch (err) {
         console.error(err);
         res.render('index', { events: [] });
@@ -89,11 +92,33 @@ app.get('/', async (req, res) => {
 
 app.get('/events', async (req, res) => {
     try {
-        const events = await db.getEvents();
+        const events = await Event.find({}).sort({ date: 1 });
         res.render('events', { events });
     } catch (err) {
         console.error(err);
         res.render('events', { events: [] });
+    }
+});
+
+app.get('/my-events', async (req, res) => {
+    if (!req.user) return res.redirect('/login');
+    try {
+        const user = await User.findById(req.user._id).populate('enrolledEvents');
+        res.render('my-events', { events: user.enrolledEvents });
+    } catch (err) {
+        console.error(err);
+        res.render('my-events', { events: [] });
+    }
+});
+
+app.get('/admin-dashboard', async (req, res) => {
+    if (!req.user || req.user.role !== 'admin') return res.redirect('/');
+    try {
+        const events = await Event.find({}).sort({ date: 1 });
+        res.render('admin-dashboard', { events });
+    } catch (err) {
+        console.error(err);
+        res.render('admin-dashboard', { events: [] });
     }
 });
 

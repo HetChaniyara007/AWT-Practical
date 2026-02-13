@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('partials/head', { title: 'Admin Dashboard - CampusConnect' }) %>
+
+    <body>
+        <%- include('partials/navbar', { page: 'admin' }) %>
+
+            <div style="padding-top: 80px;"></div>
+
+            <div class="container" style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+                <header class="section-header">
+                    <h2>Admin Console</h2>
+                    <button id="createEventBtn" class="btn-primary" onclick="showCreateEventModal()">+ Create
+                        Event</button>
+                </header>
+
+                <div class="dashboard-stats"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="stat-card"
+                        style="background: var(--card-bg); padding: 1.5rem; border-radius: 10px; box-shadow: var(--shadow);">
+                        <h3>Total Events</h3>
+                        <p style="font-size: 2rem; font-weight: bold; color: var(--accent-blue);">
+                            <%= events.length %>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="events-list">
+                    <h3>Manage Events</h3>
+                    <div style="overflow-x: auto;">
+                        <table
+                            style="width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--card-bg); border-radius: 10px; overflow: hidden;">
+                            <thead>
+                                <tr style="background: rgba(0,0,0,0.05); text-align: left;">
+                                    <th style="padding: 1rem;">Title</th>
+                                    <th style="padding: 1rem;">Date</th>
+                                    <th style="padding: 1rem;">Location</th>
+                                    <th style="padding: 1rem;">Status</th>
+                                    <th style="padding: 1rem;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% events.forEach(event=> { %>
+                                    <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                                        <td style="padding: 1rem;">
+                                            <%= event.title %>
+                                        </td>
+                                        <td style="padding: 1rem;">
+                                            <%= new Date(event.date).toLocaleDateString() %>
+                                        </td>
+                                        <td style="padding: 1rem;">
+                                            <%= event.location %>
+                                        </td>
+                                        <td style="padding: 1rem;">
+                                            <%= event.status %>
+                                        </td>
+                                        <td style="padding: 1rem;">
+                                            <button
+                                                onclick="viewRegistrations('<%= event._id %>', '<%= event.title %>')"
+                                                class="btn-secondary" style="font-size: 0.8rem; padding: 5px 10px;">View
+                                                Registrations</button>
+                                            <button onclick="deleteEvent('<%= event._id %>')"
+                                                style="background:rgba(239, 68, 68, 0.2); color:#ef4444; border:1px solid #ef4444; padding:5px 10px; border-radius:5px; cursor:pointer; margin-left: 5px;">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Viewing Registrations -->
+            <div id="registrationsModal"
+                style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+                <div
+                    style="background:var(--card-bg); padding:2rem; border-radius:10px; width:90%; max-width:600px; max-height: 80vh; overflow-y: auto;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 id="regModalTitle">Registrations</h3>
+                        <button onclick="document.getElementById('registrationsModal').style.display='none'"
+                            style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-color);">×</button>
+                    </div>
+                    <div id="registrationsList">
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Event Modal (Reused) -->
+            <div id="createEventModal"
+                style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+                <div style="background:var(--card-bg); padding:2rem; border-radius:10px; width:90%; max-width:500px;">
+                    <h3 style="margin-bottom:1rem;">Create New Event</h3>
+                    <form id="createEventForm">
+                        <input type="text" id="evtTitle" placeholder="Title" required
+                            style="width:100%; margin-bottom:10px; padding:8px;">
+                        <input type="text" id="evtDate" placeholder="Date (YYYY-MM-DD)" required
+                            style="width:100%; margin-bottom:10px; padding:8px;">
+                        <input type="text" id="evtTime" placeholder="Time (e.g. 10:00 AM)" required
+                            style="width:100%; margin-bottom:10px; padding:8px;">
+                        <input type="text" id="evtLocation" placeholder="Location" required
+                            style="width:100%; margin-bottom:10px; padding:8px;">
+                        <textarea id="evtDesc" placeholder="Description" required
+                            style="width:100%; margin-bottom:10px; padding:8px;"></textarea>
+                        <input type="text" id="evtImage" placeholder="Image URL (optional)"
+                            style="width:100%; margin-bottom:10px; padding:8px;">
+                        <div style="display:flex; gap:10px; justify-content:flex-end;">
+                            <button type="button"
+                                onclick="document.getElementById('createEventModal').style.display='none'"
+                                style="padding:8px 16px;">Cancel</button>
+                            <button type="submit" class="btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <%- include('partials/footer') %>
+
+                <script src="/js/main.js"></script>
+                <script>
+                    async function viewRegistrations(eventId, eventTitle) {
+                        const modal = document.getElementById('registrationsModal');
+                        const title = document.getElementById('regModalTitle');
+                        const list = document.getElementById('registrationsList');
+
+                        modal.style.display = 'flex';
+                        title.textContent = `Registrations for ${eventTitle}`;
+                        list.innerHTML = '<p>Loading...</p>';
+
+                        try {
+                            const res = await fetch(`/api/events/${eventId}/registrations`);
+                            const students = await res.json();
+
+                            if (students.length === 0) {
+                                list.innerHTML = '<p>No registrations yet.</p>';
+                                return;
+                            }
+
+                            let html = '<ul style="list-style: none; padding: 0;">';
+                            students.forEach(student => {
+                                html += `<li style="padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between;">
+                                <span><strong>${student.name}</strong> (${student.email})</span>
+                                <span style="font-size: 0.8rem; opacity: 0.7;">${student.role}</span>
+                            </li>`;
+                            });
+                            html += '</ul>';
+                            list.innerHTML = html;
+
+                        } catch (error) {
+                            console.error(error);
+                            list.innerHTML = '<p style="color: red;">Failed to load registrations.</p>';
+                        }
+                    }
+                </script>
+    </body>
+
+</html>

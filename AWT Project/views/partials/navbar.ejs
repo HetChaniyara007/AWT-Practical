@@ -1,22 +1,66 @@
 <nav class="navbar">
-    <a href="/" class="logo">CampusConnect.</a>
-    <ul class="nav-links">
-        <% if (locals.user) { %>
-            <li id="user-greeting"><span style="color: var(--accent-blue)">Hi, <%= user.name %></span></li>
-            <% } %>
-                <li><a href="/" class="<%= typeof page !== 'undefined' && page === 'home' ? 'active' : '' %>">Home</a>
-                </li>
-                <li><a href="/events"
-                        class="<%= typeof page !== 'undefined' && page === 'events' ? 'active' : '' %>">Events</a></li>
-                <li><a href="/clubs"
-                        class="<%= typeof page !== 'undefined' && page === 'clubs' ? 'active' : '' %>">Clubs</a></li>
-                <li><a href="/about"
-                        class="<%= typeof page !== 'undefined' && page === 'about' ? 'active' : '' %>">About</a></li>
-    </ul>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle Theme">☀️</button>
-    <% if (locals.user) { %>
-        <a href="#" class="btn-login" id="logoutBtn">Logout</a>
-        <% } else { %>
-            <a href="/login" class="btn-login">Login</a>
-            <% } %>
+        <div class="nav-left">
+                <a href="/" class="logo">CampusConnect.</a>
+        </div>
+
+        <% const isAuthPage = (typeof page !== 'undefined' && (page === 'login' || page === 'register')); %>
+
+        <div class="nav-center">
+                <% if (!isAuthPage) { %>
+                <ul class="nav-links">
+                        <li><a href="/"
+                                        class="<%= typeof page !== 'undefined' && page === 'home' ? 'active' : '' %>">Home</a>
+                        </li>
+                        <li><a href="/events"
+                                        class="<%= typeof page !== 'undefined' && page === 'events' ? 'active' : '' %>">Events</a>
+                        </li>
+                        <li><a href="/clubs"
+                                        class="<%= typeof page !== 'undefined' && page === 'clubs' ? 'active' : '' %>">Clubs</a>
+                        </li>
+                        <li><a href="/about"
+                                        class="<%= typeof page !== 'undefined' && page === 'about' ? 'active' : '' %>">About</a>
+                        </li>
+                </ul>
+                <% } %>
+        </div>
+
+        <div class="nav-right">
+                <% if (locals.user) { %>
+                        <%- include('user-menu', { user: user }) %>
+                                <% } else { %>
+                                        <% if (!isAuthPage) { %>
+                                        <div class="auth-buttons" style="display: flex; align-items: center;">
+                                                <a href="/login" class="btn-login">Login</a>
+                                                <a href="/register" class="btn-register-nav">Sign Up</a>
+                                        </div>
+                                        <% } %>
+                                <% } %>
+                                <button id="themeToggle" class="theme-toggle">🌙</button>
+        </div>
 </nav>
+
+<script>
+        // Theme Toggling Logic
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const root = document.documentElement;
+
+        // Check for saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+                root.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+                const currentTheme = root.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                root.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+                themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+</script>

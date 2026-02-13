@@ -1,0 +1,78 @@
+<div class="user-menu-container">
+    <button class="user-menu-btn" onclick="toggleUserMenu()">
+        <span class="user-avatar">
+            <%= user.name.charAt(0).toUpperCase() %>
+        </span>
+        <span class="user-name">
+            <%= user.name.split(' ')[0] %>
+        </span>
+        <span class="chevron">▼</span>
+    </button>
+    <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-header">
+            <p class="user-email">
+                <%= user.email %>
+            </p>
+            <span class="user-role-badge">
+                <%= user.role %>
+            </span>
+        </div>
+        <ul class="dropdown-items">
+            <% if (user.role===' admin' ) { %>
+                <li>
+                    <a href="/admin-dashboard">
+                        <span>⚙️</span> Admin Console
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="alert('Student List feature coming soon!')">
+                        <span>🎓</span> Students
+                    </a>
+                </li>
+                <% } else { %>
+                    <li>
+                        <a href="/my-events">
+                            <span>📅</span> My Hub
+                        </a>
+                    </li>
+                    <% } %>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#" onclick="logout()" class="logout-item">
+                                <span>🚪</span> Logout
+                            </a>
+                        </li>
+                        </ul>
+</div>
+</div>
+
+<script>
+    function toggleUserMenu() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function (e) {
+        if (!e.target.closest('.user-menu-container')) {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        }
+    });
+
+    async function logout() {
+        try {
+            const res = await fetch('/api/auth/logout', { method: 'POST' });
+            if (res.ok) {
+                window.location.href = '/login';
+            } else {
+                alert('Logout failed');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error logging out');
+        }
+    }
+</script>

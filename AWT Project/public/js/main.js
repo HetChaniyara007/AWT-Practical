@@ -57,6 +57,7 @@ if (createEventForm) {
         e.preventDefault();
         const title = document.getElementById('evtTitle').value;
         const date = document.getElementById('evtDate').value;
+        const time = document.getElementById('evtTime').value;
         const location = document.getElementById('evtLocation').value;
         const description = document.getElementById('evtDesc').value;
         const image = document.getElementById('evtImage').value;
@@ -65,7 +66,7 @@ if (createEventForm) {
             const res = await fetch('/api/events', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, date, location, description, image })
+                body: JSON.stringify({ title, date, time, location, description, image })
             });
             if (res.ok) {
                 document.getElementById('createEventModal').style.display = 'none';
@@ -81,13 +82,35 @@ if (createEventForm) {
     });
 }
 
+async function registerEvent(id) {
+    if (!confirm('Register for this event?')) return;
+    try {
+        const res = await fetch(`/api/events/${id}/register`, { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+            alert('Successfully registered!');
+            window.location.reload();
+        } else {
+            alert(data.error || 'Failed to register');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error registering for event');
+    }
+}
+
 function setupLogout() {
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            await fetch('/api/auth/logout', { method: 'POST' });
-            window.location.href = '/';
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout failed', error);
+                window.location.href = '/';
+            }
         });
     }
 }
