@@ -34,16 +34,17 @@ router.get('/', async (req, res) => {
 // Create event (Admin only)
 router.post('/', verifyAdmin, async (req, res) => {
     try {
-        const { title, date, time, location, description, image } = req.body;
+        const { title, date, startTime, endTime, location, description, image } = req.body;
 
-        if (!title || !date || !time || !location || !description) {
+        if (!title || !date || !startTime || !endTime || !location || !description) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
         const newEvent = await Event.create({
             title,
             date,
-            time,
+            startTime,
+            endTime,
             location,
             description,
             image: image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=2670'

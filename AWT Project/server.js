@@ -19,9 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// View Engine Setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+// View Engine Setup removed for React SPA
 
 // User Identity Middleware
 app.use(async (req, res, next) => {
@@ -68,8 +66,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/events', require('./routes/eventRoutes'));
 app.use('/clubs', require('./routes/clubRoutes')); // New Clubs Route
 
-// View Routes
-const clubs = [
+// View Routes (converted to API endpoints)
+const clubsTemplate = [
     { name: "Coding Club", icon: "💻", description: "Learn, code, and build projects together." },
     { name: "Dance Society", icon: "💃", description: "Express yourself through rhythm and movement." },
     { name: "Music Club", icon: "🎵", description: "Jam sessions, concerts, and musical workshops." },
@@ -80,80 +78,31 @@ const clubs = [
 
 const Event = require('./models/Event');
 
-app.get('/', async (req, res) => {
+app.get('/api/featured-events', async (req, res) => {
     try {
-        const events = await Event.find({}).sort({ date: 1 }).limit(3);
-        res.render('index', { events });
+        const events = await Event.find({}).sort({ date: 1 }).limit(10);
+        res.json(events);
     } catch (err) {
         console.error(err);
-        res.render('index', { events: [] });
+        res.status(500).json({ error: 'Failed to fetch featured events' });
     }
 });
 
-app.get('/events', async (req, res) => {
-    try {
-        const events = await Event.find({}).sort({ date: 1 });
-        res.render('events', { events });
-    } catch (err) {
-        console.error(err);
-        res.render('events', { events: [] });
-    }
-});
-
-app.get('/my-events', async (req, res) => {
-    if (!req.user) return res.redirect('/login');
+app.get('/api/my-events', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
     try {
         const user = await User.findById(req.user._id).populate('enrolledEvents');
-        res.render('my-events', { events: user.enrolledEvents });
+        res.json(user.enrolledEvents);
     } catch (err) {
         console.error(err);
-        res.render('my-events', { events: [] });
+        res.status(500).json({ error: 'Failed to fetch user events' });
     }
 });
 
-app.get('/admin-dashboard', async (req, res) => {
-    if (!req.user || req.user.role !== 'admin') return res.redirect('/');
-    try {
-        const events = await Event.find({}).sort({ date: 1 });
-        res.render('admin-dashboard', { events });
-    } catch (err) {
-        console.error(err);
-        res.render('admin-dashboard', { events: [] });
-    }
-});
-
-app.get('/clubs', (req, res) => {
-    res.render('clubs', { clubs });
-});
-
-app.get('/about', (req, res) => {
-    res.render('about');
-});
-
-app.get('/login', (req, res) => {
-    if (req.user) return res.redirect('/');
-    res.render('login');
-});
-
-app.get('/register', (req, res) => {
-    if (req.user) return res.redirect('/');
-    res.render('register');
-});
-
-app.get('/contact', (req, res) => {
-    res.render('contact');
-});
-
-app.get('/privacy', (req, res) => {
-    res.render('legal', { title: 'Privacy Policy' });
-});
-
-app.get('/terms', (req, res) => {
-    res.render('legal', { title: 'Terms of Service' });
-});
-
-app.get('/help', (req, res) => {
-    res.render('legal', { title: 'Help Center' });
+// React static files routing middleware (to be used in production later)
+// For now in dev, Vite handles the frontend on port 5173
+app.use((req, res) => {
+    res.status(404).json({ error: 'Not Found' });
 });
 
 app.listen(PORT, () => {
