@@ -1,0 +1,7 @@
+# Agent and IDE state
+.gemini/
+.agent/state/
+.agent/logs/
+.gsd/state/
+.gsd/logs/
+pdf_output.txt

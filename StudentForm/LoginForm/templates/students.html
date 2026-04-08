@@ -1,0 +1,9 @@
+<h1>Student List</h1>
+
+<a href="/add/">Add Student</a>
+
+<ul>
+  {% for student in students %}
+    <li>{{ student.name }} - {{ student.email }}</li>
+  {% endfor %}
+</ul>
