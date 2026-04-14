@@ -1,10 +1,34 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import App from './App';
+import { AuthProvider } from './contexts/AuthContext';
+import { SocketProvider } from './contexts/SocketContext';
+import './index.css';
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <SocketProvider>
+          <App />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: '#1a1a3e',
+                color: '#e2e8f0',
+                border: '1px solid rgba(99,102,241,0.3)',
+                borderRadius: '12px',
+                fontSize: '14px',
+              },
+              success: { iconTheme: { primary: '#10b981', secondary: '#0a0a1a' } },
+              error: { iconTheme: { primary: '#ef4444', secondary: '#0a0a1a' } },
+            }}
+          />
+        </SocketProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </React.StrictMode>
+);

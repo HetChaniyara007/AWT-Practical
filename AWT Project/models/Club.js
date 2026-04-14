@@ -1,29 +1,16 @@
 const mongoose = require('mongoose');
 
-const clubSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    image: {
-        type: String,
-        required: true
-    },
-    president: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true
-    }
-});
+const clubSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, unique: true, trim: true },
+    description: { type: String, default: '', trim: true },
+    logo: { type: String, default: '' },
+    adminUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    tags: [{ type: String, trim: true }],
+    isActive: { type: Boolean, default: true },
+    foundedYear: { type: Number, default: new Date().getFullYear() },
+  },
+  { timestamps: true }
+);
 
-const Club = mongoose.model('Club', clubSchema);
-
-module.exports = Club;
+module.exports = mongoose.model('Club', clubSchema);

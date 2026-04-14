@@ -1,110 +1,85 @@
-const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 require('dotenv').config();
-const connectDB = require('./utils/dbConfig');
-const User = require('./models/User');
-const crypto = require('crypto');
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
 
-// Connect to Database
-connectDB();
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    credentials: true,
+  },
+});
 
-// Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// ─── Middleware ───────────────────────────────────────────
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true,
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// View Engine Setup removed for React SPA
+// ─── Socket.io ───────────────────────────────────────────
+io.on('connection', (socket) => {
+  console.log(`[Socket] Connected: ${socket.id}`);
 
-// User Identity Middleware
-app.use(async (req, res, next) => {
-    const userId = req.cookies.userId;
-    if (userId) {
-        try {
-            const user = await User.findById(userId).select('-password');
-            req.user = user;
-        } catch (e) {
-            req.user = null;
-        }
-    } else {
-        req.user = null;
-    }
-    res.locals.user = req.user; // Make user available to all views
-    next();
+  socket.on('join', (userId) => {
+    socket.join(userId);
+    console.log(`[Socket] User ${userId} joined room`);
+  });
+
+  socket.on('join_admin', () => {
+    socket.join('admin_room');
+    console.log('[Socket] Admin joined admin_room');
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`[Socket] Disconnected: ${socket.id}`);
+  });
 });
 
-// Initialize default admin if not exists
-// Simple hash function using crypto (should ideally use bcryptjs as per plan, but keeping consistent for now, will update auth routes to use bcryptjs and then update this)
-const bcrypt = require('bcryptjs');
+// Attach io to req so routes can emit events
+app.set('io', io);
 
-(async () => {
-    try {
-        const adminEmail = 'admin@college.edu';
-        const adminExists = await User.findOne({ email: adminEmail });
-        if (!adminExists) {
-            const hashedPassword = await bcrypt.hash('admin123', 10);
-            await User.create({
-                name: 'Admin User',
-                email: adminEmail,
-                password: hashedPassword,
-                role: 'admin'
-            });
-            console.log('Default admin account created: admin@college.edu / admin123');
-        }
-    } catch (err) {
-        console.error('Error initializing default admin:', err);
-    }
-})();
+// ─── Routes ──────────────────────────────────────────────
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/events', require('./routes/events'));
+app.use('/api/clubs', require('./routes/clubs'));
+app.use('/api/registrations', require('./routes/registrations'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/notifications', require('./routes/notifications'));
 
-// API Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/events', require('./routes/eventRoutes'));
-app.use('/clubs', require('./routes/clubRoutes')); // New Clubs Route
+// ─── Health check ─────────────────────────────────────────
+app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
-// View Routes (converted to API endpoints)
-const clubsTemplate = [
-    { name: "Coding Club", icon: "💻", description: "Learn, code, and build projects together." },
-    { name: "Dance Society", icon: "💃", description: "Express yourself through rhythm and movement." },
-    { name: "Music Club", icon: "🎵", description: "Jam sessions, concerts, and musical workshops." },
-    { name: "Photography", icon: "📸", description: "Capture the best moments of campus life." },
-    { name: "Debate Society", icon: "🗣️", description: "Voice your opinion and master the art of argumentation." },
-    { name: "Robotics", icon: "🤖", description: "Build the future with wires and code." }
-];
-
-const Event = require('./models/Event');
-
-app.get('/api/featured-events', async (req, res) => {
-    try {
-        const events = await Event.find({}).sort({ date: 1 }).limit(10);
-        res.json(events);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to fetch featured events' });
-    }
+// ─── Global error handler ─────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('[Error]', err.message);
+  res.status(err.status || 500).json({ message: err.message || 'Internal server error' });
 });
 
-app.get('/api/my-events', async (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    try {
-        const user = await User.findById(req.user._id).populate('enrolledEvents');
-        res.json(user.enrolledEvents);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to fetch user events' });
-    }
-});
+// ─── MongoDB ──────────────────────────────────────────────
+mongoose
+  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/college_events')
+  .then(() => {
+    console.log('✅ MongoDB connected');
+    const PORT = process.env.PORT || 5000;
+    server.listen(PORT, () => {
+      console.log(`🚀 Server running → http://localhost:${PORT}`);
+      console.log(`📡 Socket.io ready`);
+    });
+  })
+  .catch((err) => {
+    console.error('❌ MongoDB connection failed:', err.message);
+    process.exit(1);
+  });
 
-// React static files routing middleware (to be used in production later)
-// For now in dev, Vite handles the frontend on port 5173
-app.use((req, res) => {
-    res.status(404).json({ error: 'Not Found' });
-});
-
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+module.exports = { app, io };
