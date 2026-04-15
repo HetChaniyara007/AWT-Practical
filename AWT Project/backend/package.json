@@ -1,22 +1,49 @@
 {
+<<<<<<< HEAD:AWT Project/backend/package.json
   "name": "backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
+=======
+  "name": "college-event-management",
+  "version": "2.0.0",
+  "description": "College Event Management System — Full Stack",
+  "main": "server.js",
+>>>>>>> f7def9b7127b4ca3cfcacc0a05c61177e2e37ed9:AWT Project/package.json
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "concurrently \"nodemon server.js\" \"cd frontend && npm run dev\"",
+    "seed": "node scripts/seed.js",
+    "test": "echo \"No tests configured\" && exit 0"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+<<<<<<< HEAD:AWT Project/backend/package.json
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.3.2"
+=======
+    "concurrently": "^9.2.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.4",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.13",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.3"
+>>>>>>> f7def9b7127b4ca3cfcacc0a05c61177e2e37ed9:AWT Project/package.json
   }
 }

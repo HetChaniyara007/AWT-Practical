@@ -1,0 +1,37 @@
+==================================================
+        CAMPUS EVENTS & CLUBS DIRECTORY
+            High-Level Project Summary
+==================================================
+
+1. OVERVIEW
+This project is a modern, dynamic web application designed to manage campus events and student clubs. It has been built to scale from a few initial users to an enterprise grade application capable of handling over 10,000 users.
+
+2. TECHNOLOGY STACK
+The project is built using the "MERN" Stack:
+- Frontend: React.js (bootstrapped with Vite for extreme speed)
+- Styling & Animations: Tailwind CSS (v4) and Framer Motion (for buttery-smooth popup morphing and scroll physics)
+- Backend API: Node.js with Express.js
+- Database: MongoDB (using Mongoose schemas)
+
+3. CORE FEATURES
+- Dynamic SPA Experience: No page reloads. Everything clicks and seamlessly transitions using "Shared Layout Animations".
+- Light/Dark Mode: Global theme state seamlessly tracks across all pages.
+- Role-Based Authentication: 
+     * Admins can create new backend events from the UI and see a numeric "Student Traffic" dashboard for each event.
+     * Students get an automatic "Registered Timeline" built dynamically at the top of their page, and can formally register for open events.
+- Highly Secure: It utilizes robust cookie-based user session handling and standard bcrypt.js password hashing for real-world user authentication.
+
+4. DATABASE SEEDING
+This codebase features an automatic initialization script. If you copy this code to a new computer, the script `scripts/seedDatabase.js` will instantly inject all initial mock data (like the GDSC Club, the TechNova Event, and default User accounts) right into the local MongoDB instance. This keeps presentation extremely reliable.
+
+
+Since it acts dynamically as two servers (Express and Vite) working simultaneously together:
+- First, make sure you have MongoDB running on your machine (like MongoDB Compass local daemon).
+- Open the root folder of this project in your terminal.
+- Run `npm install` and `cd frontend && npm install` (if it's a completely fresh install).
+- To launch everything together immediately, run:
+       `npm run dev` 
+  (This utilizes 'concurrently' to simultaneously boot Express on Port 3000 and the Vite Frontend on Port 5173).
+
+6. MIGRATION FROM OLD PROJECT
+Any older EJS "server-side rendered" views or basic static HTML structures were intentionally completely purged. This application operates entirely on REST API calls passing pure JSON back and forth -- the absolute industry standard for producing highly scalable UI-driven tech endpoints.
