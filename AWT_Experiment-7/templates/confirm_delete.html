@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="header-actions">
+    <h1>Drop Trainee</h1>
+    <a href="/" class="btn">Cancel</a>
+</div>
+
+<div class="empty-state">
+    <h2 style="color: var(--danger-color);">Are you absolutely sure?</h2>
+    <p>Do you really want to permanently remove <strong>{{ trainee.first_name }} {{ trainee.last_name }}</strong> from this bootcamp cohort?</p>
+    <form method="POST" style="margin-top: 30px;">
+        <button type="submit" class="btn btn-danger">Yes, Remove</button>
+        <a href="/" class="btn" style="margin-left: 10px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

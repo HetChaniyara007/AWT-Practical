@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="header-actions">
+    <div>
+        <h1 style="margin-bottom: 5px;">Student Directory</h1>
+        <p style="color: var(--text-secondary); margin: 0; font-size: 0.95rem;">Manage the logistical records of all enrolled students.</p>
+    </div>
+    <a href="/create" class="btn">+ Enroll Student</a>
+</div>
+
+{% if students %}
+<table>
+    <thead>
+        <tr>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Emergency Contact</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr>
+            <td><strong>{{ student.student_id }}</strong></td>
+            <td>
+                <div style="font-weight: 500;">{{ student.first_name }} {{ student.last_name }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Blood: {{ student.blood_group }}</div>
+            </td>
+            <td>{{ student.department }}</td>
+            <td>{{ student.emergency_contact }}</td>
+            <td style="display: flex; gap: 8px;">
+                <a href="/idcard/{{ student.id }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">View ID</a>
+                <a href="/update/{{ student.id }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Edit</a>
+                <a href="/delete/{{ student.id }}" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;">Drop</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 20px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+    <h2>No official records exist.</h2>
+    <p>Begin by adding a new student to the master database.</p>
+</div>
+{% endif %}
+{% endblock %}
